@@ -1,0 +1,6 @@
+{
+  "name": "Controle e Diagnóstico Financeiro",
+  "description": "Aplicativo responsivo estilo SaaS para organização, diagnóstico e alertas de consumo pessoal.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
