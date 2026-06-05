@@ -14,6 +14,7 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
   const [monthlyDeposit, setMonthlyDeposit] = useState<number>(defaultMonthlyContribution);
   const [cdiPercentage, setCdiPercentage] = useState<number>(100); // e.g. 100% CDI
   const [annualCdiBase, setAnnualCdiBase] = useState<number>(10.75); // Current standard CDI in BR (e.g. 10.75%)
+  const [selectedPeriod, setSelectedPeriod] = useState<'1m' | '1y' | '5y'>('1y'); // Selected period for growth projections
 
   // Reset monthly deposit when totalIncome changes so it initializes to 10% automatically
   useEffect(() => {
@@ -86,61 +87,61 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
         )}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 bg-slate-50 p-5 rounded-2xl border border-slate-100">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 bg-slate-50 p-6 sm:p-8 rounded-2xl border border-slate-200/60 shadow-xs">
         
         {/* INVEST SLIDERS AND CONTROLS */}
-        <div className="lg:col-span-1 space-y-5">
-          <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+        <div className="lg:col-span-5 space-y-6">
+          <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2 pb-2 border-b border-slate-200">
             <Scale className="h-4 w-4 text-emerald-600" />
-            Ajustar Simulação
+            Ajustar Parâmetros da Simulação
           </h4>
 
           {/* New: Advanced Input + Slider for already Invested Capital (Grana já investida) up to 1 Trillion */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs font-semibold">
-              <span className="text-slate-500">Capital Inicial já Investido</span>
-              <span className="text-indigo-600 text-[11px] font-bold bg-indigo-50 px-2 py-0.5 rounded-lg border border-indigo-100 block max-w-full truncate text-right" title={formatCurrency(initialCapital)}>
-                {initialCapital >= 1000000 
-                  ? `${formatCurrency(initialCapital)}` 
-                  : formatCurrency(initialCapital)
-                }
+          <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-slate-600">Capital Inicial já Investido</span>
+              <span className="text-indigo-600 text-xs font-bold bg-indigo-50/80 px-2.5 py-0.5 rounded-lg border border-indigo-100 block max-w-[180px] truncate text-right" title={formatCurrency(initialCapital)}>
+                {formatCurrency(initialCapital)}
               </span>
             </div>
 
             {/* Direct Number Input to easily write enormous amounts like 1 Trillion */}
             <div className="relative">
-              <span className="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-bold text-slate-400">R$</span>
+              <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-sm font-bold text-slate-400">R$</span>
               <input 
+                id="capital-inicial-input"
                 type="number"
                 min="0"
                 max={1000000000000} // 1 Trilion limit
                 step="any"
                 value={initialCapital === 0 ? '' : initialCapital}
-                placeholder="Ex %0,00"
+                placeholder="0,00"
                 onChange={(e) => {
                   const val = parseFloat(e.target.value);
                   setInitialCapital(isNaN(val) ? 0 : Math.min(1000000000000, Math.max(0, val)));
                 }}
-                className="w-full pl-8 pr-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-sm font-extrabold text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all"
               />
             </div>
 
-            {/* Range slider on logarithmic/stepped feel for quick adjustment of large scales inside 0 to 1B, but user typed value can go up to 1 Trillion */}
-            <input 
-              type="range"
-              min="0"
-              max="10000000" // Quick range helper up to 10M
-              step="1000"
-              value={initialCapital > 10000000 ? 10000000 : initialCapital}
-              onChange={(e) => {
-                setInitialCapital(Number(e.target.value));
-              }}
-              className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
-            />
+            {/* Range slider on logarithmic/stepped feel for quick adjustment of large scales inside 0 to 10M */}
+            <div className="pt-1">
+              <input 
+                type="range"
+                min="0"
+                max="10000000" // Quick range helper up to 10M
+                step="1000"
+                value={initialCapital > 10000000 ? 10000000 : initialCapital}
+                onChange={(e) => {
+                  setInitialCapital(Number(e.target.value));
+                }}
+                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              />
+            </div>
 
             {/* Scale helper tag in words to avoid counting zeros manually */}
             {initialCapital > 0 && (
-              <div className="text-[11px] text-indigo-700 bg-indigo-50/60 p-2 rounded-lg font-medium leading-none flex items-center justify-between">
+              <div className="text-[11px] text-indigo-700 bg-indigo-50/60 p-2.5 rounded-lg font-medium leading-none flex items-center justify-between">
                 <span>Grandeza por extenso:</span>
                 <span className="font-extrabold text-indigo-900">
                   {initialCapital < 1000 ? `${initialCapital} Reais` :
@@ -154,18 +155,18 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
             )}
 
             {/* Quick action buttons to set specific big metrics instantly */}
-            <div className="grid grid-cols-4 gap-1 pt-1">
+            <div className="grid grid-cols-4 gap-1.5 pt-1">
               <button 
                 type="button" 
                 onClick={() => setInitialCapital(0)}
-                className="py-1 text-[9px] font-bold bg-white border border-slate-200 hover:bg-rose-50 hover:text-rose-600 rounded-md text-slate-500 transition-colors"
+                className="py-1.5 text-[10px] font-bold bg-slate-50 border border-slate-200 hover:bg-rose-50 hover:text-rose-600 rounded-lg text-slate-500 transition-colors cursor-pointer"
               >
                 Zerou
               </button>
               <button 
                 type="button" 
                 onClick={() => setInitialCapital(1000000)} // 1 Milhão
-                className="py-1 text-[9px] font-bold bg-white border border-slate-200 hover:bg-indigo-50 hover:text-indigo-600 rounded-md text-indigo-500 transition-colors"
+                className="py-1.5 text-[10px] font-bold bg-slate-50 border border-slate-200 hover:bg-slate-100 hover:text-indigo-600 rounded-lg text-indigo-500 transition-colors cursor-pointer"
                 title="Configurar R$ 1 Milhão"
               >
                 1M
@@ -173,27 +174,27 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
               <button 
                 type="button" 
                 onClick={() => setInitialCapital(1000000000)} // 1 Bilhão
-                className="py-1 text-[9px] font-bold bg-indigo-50 border border-indigo-100 hover:bg-indigo-100 text-indigo-800 rounded-md text-indigo-600 transition-colors"
+                className="py-1.5 text-[10px] font-bold bg-indigo-50/50 border border-indigo-100 hover:bg-indigo-100 text-indigo-800 rounded-lg text-indigo-600 transition-colors cursor-pointer"
                 title="Configurar R$ 1 Bilhão"
               >
-                1B (Bilhão)
+                1B
               </button>
               <button 
                 type="button" 
                 onClick={() => setInitialCapital(1000000000000)} // 1 Trilhão
-                className="py-1 text-[9px] font-bold bg-indigo-900/10 border border-indigo-900/20 hover:bg-indigo-900/20 text-indigo-950 rounded-md transition-colors font-extrabold"
+                className="py-1.5 text-[10px] font-bold bg-indigo-950/10 border border-indigo-900/20 hover:bg-indigo-950/20 text-indigo-950 rounded-lg transition-colors font-extrabold cursor-pointer"
                 title="Configurar R$ 1 Trilhão máximo"
               >
-                1T (Trilhão)
+                1T
               </button>
             </div>
           </div>
 
           {/* Slider Monthly Deposit */}
-          <div className="space-y-2">
-            <div className="flex justify-between items-center text-xs font-semibold">
-              <span className="text-slate-500">Aporte Mensal Recorrente</span>
-              <span className="text-emerald-600 text-sm font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100">
+          <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs">
+            <div className="flex justify-between items-center">
+              <span className="text-xs font-semibold text-slate-600">Aporte Mensal Recorrente</span>
+              <span className="text-emerald-700 text-xs font-bold bg-emerald-50 px-2.5 py-0.5 rounded-lg border border-emerald-100">
                 {formatCurrency(monthlyDeposit)}
               </span>
             </div>
@@ -204,17 +205,17 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
               step="50"
               value={monthlyDeposit}
               onChange={(e) => setMonthlyDeposit(Number(e.target.value))}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-emerald-600"
+              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-emerald-600"
             />
-            <div className="flex justify-between text-[10px] text-slate-400">
+            <div className="flex justify-between text-[10px] text-slate-400 font-medium">
               <span>Mín: {formatCurrency(50)}</span>
               {totalIncome > 0 && (
                 <button 
                   type="button"
                   onClick={() => setMonthlyDeposit(Math.round(tenPercentOfIncome))}
-                  className="hover:text-indigo-600 hover:underline font-semibold"
+                  className="text-indigo-600 hover:text-indigo-700 hover:underline font-bold"
                 >
-                  Usar 10% exatos ({formatCurrency(tenPercentOfIncome)})
+                  Usar 10% ({formatCurrency(tenPercentOfIncome)})
                 </button>
               )}
               <span>Máx: R$ 5.000</span>
@@ -222,10 +223,10 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
           </div>
 
           {/* Slider CDI Percentage */}
-          <div className="space-y-2">
+          <div className="space-y-3 bg-white p-4 rounded-xl border border-slate-200/70 shadow-2xs">
             <div className="flex justify-between items-center text-xs font-semibold">
-              <span className="text-slate-500">Rentabilidade da Aplicação</span>
-              <span className="text-indigo-600 text-sm font-bold">
+              <span className="text-slate-600">Rentabilidade da Aplicação</span>
+              <span className="text-indigo-600 text-xs font-bold bg-indigo-50 px-2.5 py-0.5 rounded-lg border border-indigo-100">
                 {cdiPercentage}% do CDI
               </span>
             </div>
@@ -236,101 +237,178 @@ export default function InvestmentSimulator({ totalIncome }: InvestmentSimulator
               step="5"
               value={cdiPercentage}
               onChange={(e) => setCdiPercentage(Number(e.target.value))}
-              className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-indigo-600"
+              className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-indigo-600"
             />
-            <div className="flex justify-between text-[10px] text-slate-400">
+            <div className="flex justify-between text-[10px] text-slate-400 font-medium">
               <span>100% CDI (Seguro)</span>
-              <span>150% (Agressivo)</span>
+              <span>150% do CDI</span>
             </div>
           </div>
 
           {/* Info Badge */}
-          <div className="p-3 bg-white border border-slate-200/60 rounded-xl flex gap-2.5 items-start text-xs text-slate-500">
-            <Info className="h-4 w-4 text-indigo-500 shrink-0 mt-0.5" />
-            <div>
-              <p className="font-semibold text-slate-700">Taxa CDI Base de Cálculo</p>
-              <p className="text-[11px] text-slate-400 mt-0.5 leading-snug">
-                Simula taxa CDI padrão de <span className="font-semibold text-slate-600">{(annualCdiBase).toFixed(2)}% ao ano</span>. Com isso, sua taxa nominal final simulada é de <span className="font-semibold text-slate-600">{(annualCdiBase * (cdiPercentage / 100)).toFixed(2)}% a.a.</span>
+          <div className="p-4 bg-indigo-50/50 border border-slate-200/50 rounded-xl flex gap-3 items-start text-xs text-slate-600 leading-relaxed">
+            <Info className="h-4.5 w-4.5 text-indigo-500 shrink-0 mt-0.5" />
+            <div className="space-y-0.5">
+              <p className="font-bold text-slate-800">Taxa Selic/CDI Estatística</p>
+              <p className="text-[11px] text-slate-500">
+                Baseado na taxa corrente simulada de <span className="font-semibold text-slate-700">{(annualCdiBase).toFixed(2)}% a.a.</span> Com o multiplicador de {cdiPercentage}%, a taxa nominal de sua simulação é igual a <span className="font-bold text-indigo-700">{(annualCdiBase * (cdiPercentage / 100)).toFixed(2)}% a.a.</span>
               </p>
             </div>
           </div>
         </div>
 
-        {/* RESULTS PROJECTIONS (1 MONTH, 1 YEAR, 5 YEARS) */}
-        <div className="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* RESULTS PROJECTIONS (TABBED SINGLE PRECISE VIEW) */}
+        <div className="lg:col-span-7 flex flex-col justify-between space-y-6">
           
-          {/* 1 MONTH */}
-          <div className="bg-white border border-slate-200/55 rounded-xl p-4 flex flex-col justify-between shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all duration-200">
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Em 1 Mês</span>
-                <span className="text-[10px] bg-slate-100 text-slate-600 font-bold px-1.5 py-0.5 rounded-md">1 Aporte</span>
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2 border-b border-slate-200">
+              <h4 className="text-sm font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                <CalendarRange className="h-4 w-4 text-indigo-600" />
+                Projeção de Crescimento Acumulado
+              </h4>
+              <div className="flex bg-slate-200/60 p-1 rounded-xl self-start sm:self-auto border border-slate-200/50">
+                <button
+                  type="button"
+                  onClick={() => setSelectedPeriod('1m')}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    selectedPeriod === '1m'
+                      ? 'bg-white text-indigo-700 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  1 Mês
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPeriod('1y')}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    selectedPeriod === '1y'
+                      ? 'bg-white text-indigo-700 shadow-xs'
+                      : 'text-slate-500 hover:text-slate-800'
+                  }`}
+                >
+                  1 Ano
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setSelectedPeriod('5y')}
+                  className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                    selectedPeriod === '5y'
+                      ? 'bg-indigo-650 text-white shadow-xs bg-indigo-600'
+                      : 'text-slate-500 hover:text-indigo-600'
+                  }`}
+                >
+                  5 Anos
+                </button>
               </div>
-              <p className="text-2xl font-black text-slate-800 tracking-tight">
-                {formatCurrency(oneMonth.totalAccumulated)}
-              </p>
             </div>
+            
+            <div className="min-h-[140px] flex flex-col justify-center">
+              {/* 1 MONTH */}
+              {selectedPeriod === '1m' && (
+                <div className="bg-white border-2 border-slate-200/70 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xs relative overflow-hidden animate-fadeIn">
+                  <span className="absolute top-0 right-0 w-24 h-24 bg-slate-50 rounded-bl-full pointer-events-none opacity-50"></span>
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-slate-100 text-slate-650 font-bold px-2 py-0.5 rounded-md text-slate-500">Curto Prazo</span>
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">1 Aporte</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-400 uppercase tracking-wider block">Acumulado em 1 Mês</span>
+                    <p className="text-3xl font-black text-slate-800 tracking-tight block truncate max-w-full" title={formatCurrency(oneMonth.totalAccumulated)}>
+                      {formatCurrency(oneMonth.totalAccumulated)}
+                    </p>
+                  </div>
 
-            <div className="mt-4 pt-3 border-t border-slate-50 space-y-1 text-xs text-slate-500 font-medium">
-              <div className="flex justify-between">
-                <span>Investido:</span>
-                <span className="text-slate-700 font-semibold">{formatCurrency(oneMonth.totalInvested)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-emerald-600">Rendimento:</span>
-                <span className="text-emerald-600 font-bold">+{formatCurrency(oneMonth.totalYield)}</span>
-              </div>
+                  <div className="w-full sm:w-auto bg-slate-50/70 rounded-xl p-4.5 border border-slate-200/50 space-y-2 text-xs font-semibold min-w-[200px] relative z-10">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Capital + Aporte:</span>
+                      <span className="text-slate-800 font-extrabold">{formatCurrency(oneMonth.totalInvested)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-600">Rendimento Líquido:</span>
+                      <span className="text-emerald-600 font-extrabold">+{formatCurrency(oneMonth.totalYield)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 1 YEAR */}
+              {selectedPeriod === '1y' && (
+                <div className="bg-white border-2 border-indigo-500/10 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-xs relative overflow-hidden animate-fadeIn">
+                  <span className="absolute top-0 right-0 w-24 h-24 bg-indigo-50/50 rounded-bl-full pointer-events-none opacity-60"></span>
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">Médio Prazo</span>
+                      <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-2 py-0.5 rounded-md">12 Aportes</span>
+                    </div>
+                    <span className="text-xs font-bold text-slate-404 uppercase tracking-wider block">Acumulado em 1 Ano</span>
+                    <p className="text-3xl font-black text-slate-800 tracking-tight block truncate max-w-full" title={formatCurrency(oneYear.totalAccumulated)}>
+                      {formatCurrency(oneYear.totalAccumulated)}
+                    </p>
+                  </div>
+
+                  <div className="w-full sm:w-auto bg-slate-50/70 rounded-xl p-4.5 border border-slate-200/50 space-y-2 text-xs font-semibold min-w-[200px] relative z-10">
+                    <div className="flex justify-between items-center">
+                      <span className="text-slate-500">Total Investido:</span>
+                      <span className="text-slate-800 font-extrabold">{formatCurrency(oneYear.totalInvested)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-600">Rendimento Líquido:</span>
+                      <span className="text-emerald-600 font-extrabold">+{formatCurrency(oneYear.totalYield)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {/* 5 YEARS */}
+              {selectedPeriod === '5y' && (
+                <div className="bg-indigo-900 border border-indigo-950 rounded-2xl p-6 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-5 shadow-md relative overflow-hidden text-white animate-fadeIn">
+                  <span className="absolute -bottom-6 -right-6 w-24 h-24 bg-emerald-500/20 rounded-full blur-xl pointer-events-none"></span>
+                  <div className="space-y-2 relative z-10">
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-md">Longo Prazo</span>
+                      <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-2 py-0.5 rounded-md">60 Aportes</span>
+                    </div>
+                    <span className="text-xs font-bold text-indigo-200 uppercase tracking-wider block">Acumulado em 5 Anos</span>
+                    <p className="text-3xl font-black text-white tracking-tight block truncate max-w-full" title={formatCurrency(fiveYears.totalAccumulated)}>
+                      {formatCurrency(fiveYears.totalAccumulated)}
+                    </p>
+                  </div>
+
+                  <div className="w-full sm:w-auto bg-white/10 rounded-xl p-4.5 border border-white/10 space-y-2 text-xs font-semibold min-w-[200px] relative z-10">
+                    <div className="flex justify-between items-center">
+                      <span className="text-indigo-200">Total Investido:</span>
+                      <span className="text-white font-extrabold">{formatCurrency(fiveYears.totalInvested)}</span>
+                    </div>
+                    <div className="flex justify-between items-center">
+                      <span className="text-emerald-300">Juros Compostos:</span>
+                      <span className="text-emerald-300 font-black">+{formatCurrency(fiveYears.totalYield)}</span>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* 1 YEAR */}
-          <div className="bg-white border border-slate-200/55 rounded-xl p-4 flex flex-col justify-between shadow-xs relative overflow-hidden group hover:border-slate-300 transition-all duration-200">
-            <span className="absolute top-0 right-0 w-16 h-16 bg-indigo-50 rounded-bl-full pointer-events-none opacity-50"></span>
-            
-            <div className="space-y-1.5 relative z-10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-400 uppercase tracking-widest block">Em 1 Ano</span>
-                <span className="text-[10px] bg-indigo-50 text-indigo-700 font-bold px-1.5 py-0.5 rounded-md">12 Aportes</span>
+          {/* ADDITIONAL METRICS DETAILS TABLE INSIDE PROJECTIONS */}
+          <div className="bg-white/80 border border-slate-200 rounded-xl p-4.5 space-y-3 shadow-3xs">
+            <h5 className="text-xs font-bold text-slate-700 uppercase tracking-widest">Resumo Estatístico da Operação completa</h5>
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-medium">
+              <div className="bg-slate-50 p-2.5 rounded-lg">
+                <span className="text-slate-400 text-[10px] block uppercase">Patrimônio Inicial</span>
+                <span className="text-slate-800 font-bold text-sm block truncate">{formatCurrency(initialCapital)}</span>
               </div>
-              <p className="text-2xl font-black text-slate-800 tracking-tight">
-                {formatCurrency(oneYear.totalAccumulated)}
-              </p>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-slate-50 space-y-1 text-xs text-slate-500 font-medium relative z-10">
-              <div className="flex justify-between">
-                <span>Investido:</span>
-                <span className="text-slate-700 font-semibold">{formatCurrency(oneYear.totalInvested)}</span>
+              <div className="bg-slate-50 p-2.5 rounded-lg">
+                <span className="text-slate-400 text-[10px] block uppercase">Aportes (5 Anos)</span>
+                <span className="text-slate-800 font-bold text-sm block truncate">{formatCurrency(monthlyDeposit * 60)}</span>
               </div>
-              <div className="flex justify-between">
-                <span className="text-emerald-600">Rendimento:</span>
-                <span className="text-emerald-600 font-bold">+{formatCurrency(oneYear.totalYield)}</span>
+              <div className="bg-slate-50 p-2.5 rounded-lg">
+                <span className="text-slate-400 text-[10px] block uppercase">Juros em 5 real</span>
+                <span className="text-emerald-600 font-bold text-sm block truncate">+{formatPercent((fiveYears.totalYield / fiveYears.totalInvested) * 100)}</span>
               </div>
-            </div>
-          </div>
-
-          {/* 5 YEARS */}
-          <div className="bg-indigo-900 border border-indigo-950 rounded-xl p-4 flex flex-col justify-between shadow-md relative overflow-hidden group hover:bg-slate-900 transition-all duration-300 text-white">
-            <span className="absolute -bottom-8 -right-8 w-16 h-16 bg-emerald-500/20 rounded-full blur-xl pointer-events-none"></span>
-            
-            <div className="space-y-1.5 relative z-10">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-indigo-300 uppercase tracking-widest block">Em 5 Anos</span>
-                <span className="text-[10px] bg-emerald-500/20 text-emerald-300 font-bold px-1.5 py-0.5 rounded-md">60 Aportes</span>
-              </div>
-              <p className="text-2xl font-black text-white tracking-tight">
-                {formatCurrency(fiveYears.totalAccumulated)}
-              </p>
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-indigo-800 space-y-1 text-xs text-indigo-200 font-medium relative z-10">
-              <div className="flex justify-between">
-                <span>Total Investido:</span>
-                <span className="text-white font-semibold">{formatCurrency(fiveYears.totalInvested)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-emerald-400">Juros Compostos:</span>
-                <span className="text-emerald-400 font-black">+{formatCurrency(fiveYears.totalYield)}</span>
+              <div className="bg-slate-50 p-2.5 rounded-lg">
+                <span className="text-slate-400 text-[10px] block uppercase">Rendimento Líquido</span>
+                <span className="text-emerald-600 font-bold text-sm block truncate">{formatCurrency(fiveYears.totalYield)}</span>
               </div>
             </div>
           </div>

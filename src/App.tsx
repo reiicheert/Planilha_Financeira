@@ -154,7 +154,7 @@ export default function App() {
       </header>
 
       {/* 2. BODY WORKSPACE CORES */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+      <main className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         
         {/* BANNER INFORMATIVE WELCOME */}
         <div className="bg-slate-900 text-white rounded-3xl p-6 lg:p-8 relative overflow-hidden shadow-lg shadow-slate-900/10">
@@ -183,69 +183,74 @@ export default function App() {
           netBalance={analysis.netBalance}
         />
 
-        {/* 4. MAIN DOUBLE COLUMN STRUCTURE */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 items-start">
+        {/* 4. LINEAR STACK OF FULL-WIDTH SECTIONS */}
+        <div className="space-y-8">
           
-          {/* LEFT 2/3 COLUMN: Diagnostics, charts, graphs and listings */}
-          <div className="lg:col-span-2 space-y-8">
+          {/* Diagnosis visual box */}
+          <DiagnosisPanel analysis={analysis} />
+
+          {/* Quick adding form */}
+          <TransactionForm onAddTransaction={handleAddTransaction} />
+
+          {/* Visual Charts and Podium of expenses */}
+          <ChartsAndMetrics analysis={analysis} />
+
+          {/* Simulated target investment planner */}
+          <InvestmentSimulator totalIncome={analysis.totalIncome} />
+
+          {/* Complete table-grid lists */}
+          <TransactionList 
+            transactions={transactions}
+            onDeleteTransaction={handleDeleteTransaction}
+            onResetMockData={handleResetMockData}
+            onClearAll={handleClearAll}
+          />
+
+          {/* Financial expert advice tips widget */}
+          <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-3xl border border-indigo-950 p-6 sm:p-8 text-white space-y-5 shadow-md relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/10 rounded-full blur-2xl pointer-events-none"></div>
             
-            {/* Diagnosis visual box */}
-            <DiagnosisPanel analysis={analysis} />
-
-            {/* Visual Charts and Podium of expenses */}
-            <ChartsAndMetrics analysis={analysis} />
-
-            {/* Simulated target investment planner */}
-            <InvestmentSimulator totalIncome={analysis.totalIncome} />
-
-            {/* Complete table-grid lists */}
-            <TransactionList 
-              transactions={transactions}
-              onDeleteTransaction={handleDeleteTransaction}
-              onResetMockData={handleResetMockData}
-              onClearAll={handleClearAll}
-            />
-
-          </div>
-
-          {/* RIGHT 1/3 COLUMN: Form creation and fast utilities */}
-          <div className="space-y-6">
-            
-            {/* Quick adding form */}
-            <TransactionForm onAddTransaction={handleAddTransaction} />
-
-            {/* Financial expert advice tips widget */}
-            <div className="bg-gradient-to-br from-indigo-900 to-slate-900 rounded-2xl border border-indigo-950 p-6 text-white space-y-4 shadow-sm">
-              <span className="inline-block px-2.5 py-0.5 rounded-full text-[10px] bg-slate-800 text-indigo-300 font-bold uppercase tracking-wider">
+            <div className="flex items-center justify-between">
+              <span className="inline-block px-3 py-1 rounded-full text-[10px] bg-slate-800 text-indigo-300 font-extrabold uppercase tracking-widest border border-indigo-500/10">
                 Dicas de Especialista
               </span>
-              
-              <h4 className="text-sm font-bold text-slate-100">
-                Como equilibrar as contas?
-              </h4>
-
-              <ul className="space-y-3.5 text-xs text-slate-300 leading-normal">
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1 shrink-0" />
-                  <span>
-                    <strong>Planeje 50-30-20:</strong> Dedique 50% para necessidades básicas, 30% para desejos pessoais e 20% para poupar/investir.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1 shrink-0" />
-                  <span>
-                    <strong>Monitore os pequenos ralos:</strong> Custos frequentes com aplicativos de transporte e comida ("Delivery") acumulam imensamente rápido.
-                  </span>
-                </li>
-                <li className="flex items-start gap-2">
-                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mt-1 shrink-0" />
-                  <span>
-                    <strong>Crie amortecedores:</strong> Busque manter uma reserva equivalente a 3 ou 6 meses de suas despesas correntes antes de novos passos.
-                  </span>
-                </li>
-              </ul>
             </div>
+            
+            <h4 className="text-lg font-extrabold text-slate-100">
+              Como construir saúde financeira de forma descomplicada?
+            </h4>
 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 pt-2">
+              <div className="space-y-2 bg-white/5 p-4.5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold">1</span>
+                  <h5 className="font-bold text-sm text-white">Método 50-30-20</h5>
+                </div>
+                <p className="text-xs text-slate-300 leading-normal">
+                  Idealize 50% para despesas essenciais (moradia, saúde), 30% para estilo de vida e lazer, e reserve no mínimo 20% para suas aplicações.
+                </p>
+              </div>
+
+              <div className="space-y-2 bg-white/5 p-4.5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold">2</span>
+                  <h5 className="font-bold text-sm text-white">Vigie Custos Invisíveis</h5>
+                </div>
+                <p className="text-xs text-slate-300 leading-normal">
+                  Pequenas tarifas bancárias, assinaturas esquecidas e delivery frequente drenam capital silenciosamente antes que você perceba.
+                </p>
+              </div>
+
+              <div className="space-y-2 bg-white/5 p-4.5 rounded-2xl border border-white/5">
+                <div className="flex items-center gap-2">
+                  <span className="flex items-center justify-center w-6 h-6 rounded-lg bg-emerald-500/20 text-emerald-300 text-xs font-bold">3</span>
+                  <h5 className="font-bold text-sm text-white">Amortecedor de Crises</h5>
+                </div>
+                <p className="text-xs text-slate-300 leading-normal">
+                  Busque blindar suas finanças criando uma reserva de liquidez rápida correspondente a 3 a 6 meses do seu custo de vida regular.
+                </p>
+              </div>
+            </div>
           </div>
 
         </div>
